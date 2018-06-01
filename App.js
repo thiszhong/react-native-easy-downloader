@@ -24,7 +24,7 @@ export default class App extends Component<Props> {
           Download and install apk for android
         </Text>
         <Text 
-          onPress={() => DM.download({hh: 'xx'})}
+          onPress={() => DM.download('http://imtt.dd.qq.com/16891/786C74AFC59C29458CD2F3D6922F49DC.apk?fsname=cn.mamaguai.cms.xiangli_2.0.4_204.apk&csr=1bbd', 'title', 'desc')}
           style={styles.instructions}>
           下载
         </Text>
