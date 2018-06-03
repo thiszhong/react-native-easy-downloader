@@ -1,6 +1,7 @@
 package com.dmdemo.module;
 
 import android.os.Environment;
+import android.database.Cursor;
 import android.widget.Toast;
 import android.webkit.MimeTypeMap;
 import android.content.IntentFilter;
@@ -13,6 +14,7 @@ import android.app.DownloadManager;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.io.File;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -95,23 +97,44 @@ public class DMModule extends ReactContextBaseJavaModule {
             if(doneDownloadId != taskId) {
               return;
             }
-            try {
-              downloadManager.openDownloadedFile(doneDownloadId);
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
-            //自动安装应用
-            Toast.makeText(getReactApplicationContext(), "count", Toast.LENGTH_SHORT).show();
             
+            //自动安装应用
+            // Toast.makeText(getReactApplicationContext(), "done", Toast.LENGTH_SHORT).show();
+            DownloadManager.Query query = new DownloadManager.Query();
+            query.setFilterById(doneDownloadId);
+            Cursor cursor = downloadManager.query(query);
+            if (cursor.moveToFirst()) {
+              int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+              // 下载失败也会返回这个广播，所以要判断下是否真的下载成功
+              if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(columnIndex)) {
+                  // 获取下载好的 apk 路径
+                  String uriString = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
+                  // 提示用户安装
+                  installApk(uriString);
+              }
+            };
         }
     }   
   };
 
   @ReactMethod
   public void installApk(final String url) {
+    Uri apkuri;
+    try {
+      File apk = new File(url);
+      if(apk.exists()) {
+        apkuri = Uri.fromFile(apk);
+      } else {
+        Toast.makeText(getReactApplicationContext(), "Not exists " + url, Toast.LENGTH_LONG).show();
+        return;
+      }
+    } catch (Exception e) {
+      Toast.makeText(getReactApplicationContext(), "Error " + url, Toast.LENGTH_LONG).show();
+      return;
+    };
     Intent intent = new Intent(Intent.ACTION_VIEW);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    intent.setDataAndType(url, "application/vnd.android.package-archive");
+    intent.setDataAndType(apkuri, "application/vnd.android.package-archive");
     contect.startActivity(intent);
   }
 }
