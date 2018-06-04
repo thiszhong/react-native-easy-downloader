@@ -1,4 +1,3 @@
-import { AppRegistry } from 'react-native';
-import App from './App';
+import { NativeModules } from 'react-native';
 
-AppRegistry.registerComponent('dmDEMO', () => App);
+export default NativeModules.DMModule;
