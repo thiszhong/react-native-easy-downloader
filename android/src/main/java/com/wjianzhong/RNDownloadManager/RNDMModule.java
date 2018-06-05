@@ -1,4 +1,4 @@
-package com.wjianzhong.downloadmanager;
+package com.wjianzhong.RNDownloadManager;
 
 import android.os.Environment;
 import android.database.Cursor;
@@ -24,18 +24,18 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.Promise;
 
-public class DMModule extends ReactContextBaseJavaModule {
+public class RNDMModule extends ReactContextBaseJavaModule {
 
   private long taskId = 0;
   private DownloadManager downloadManager;
-  private ReactApplicationContext contect;
+  private ReactApplicationContext reactContext;
   private Promise dmPromise;
   private Boolean isAutoInstall = false;
   BroadcastReceiver dmReceiver;
 
-  public DMModule(ReactApplicationContext reactContext) {
+  public RNDMModule(ReactApplicationContext reactContext) {
     super(reactContext);
-    contect = reactContext;
+    reactContext = reactContext;
   }
 
   @Override
@@ -72,7 +72,7 @@ public class DMModule extends ReactContextBaseJavaModule {
     
     // 注册广播接收器
     IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-    contect.registerReceiver(dmReceiver, filter);
+    reactContext.registerReceiver(dmReceiver, filter);
       
     DownloadManager.Request request;
     try {
@@ -99,7 +99,7 @@ public class DMModule extends ReactContextBaseJavaModule {
     MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
     request.setMimeType(mimeTypeMap.getMimeTypeFromExtension(url));
     // 开始下载
-    downloadManager = (DownloadManager) contect.getSystemService(Context.DOWNLOAD_SERVICE);
+    downloadManager = (DownloadManager) reactContext.getSystemService(Context.DOWNLOAD_SERVICE);
     taskId = downloadManager.enqueue(request);
   }
 
@@ -174,7 +174,7 @@ public class DMModule extends ReactContextBaseJavaModule {
     Intent intent = new Intent(Intent.ACTION_VIEW);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     intent.setDataAndType(apkuri, "application/vnd.android.package-archive");
-    contect.startActivity(intent);
+    reactContext.startActivity(intent);
     promise.resolve("success");
   }
 

@@ -1,4 +1,4 @@
-package com.wjianzhong.downloadmanager;
+package com.wjianzhong.RNDownloadManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.react.uimanager.ViewManager;
 
-public class AddReactPackage implements ReactPackage {
+public class RNDownloadManager implements ReactPackage {
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
@@ -26,10 +26,9 @@ public class AddReactPackage implements ReactPackage {
      * @return
      */
     @Override
-    public List<NativeModule> createNativeModules(
-        ReactApplicationContext reactContext) {
+    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
-        modules.add(new DMModule(reactContext));
+        modules.add(new RNDMModule(reactContext));
         return modules;
     }
 }

@@ -13,13 +13,14 @@ import {
   Button,
   Alert
 } from 'react-native';
-import DM from 'react-native-easy-download-manager';
+import RNDownloadManager from 'react-native-easy-download-manager';
 
 // const DM = NativeModules.MyDownload;
 
 type Props = {};
 export default class App extends Component<Props> {
   render() {
+    alert(RNDownloadManager);
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
@@ -67,8 +68,8 @@ export default class App extends Component<Props> {
         />
         <View style={styles.separator}></View>
         <Text style={styles.instructions}>Static props:</Text>
-        <Text>DM.DirDownload: {DM.DirDownload}</Text>
-        <Text>DM.DirExternalStorage: {DM.DirExternalStorage}</Text>
+        {/* <Text>DM.DirDownload: {DM.DirDownload}</Text> */}
+        {/* <Text>DM.DirExternalStorage: {DM.DirExternalStorage}</Text> */}
       </View>
     );
   }
@@ -90,8 +91,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333333',
     marginBottom: 5,
-    borderColor: '#ccc',
-    borderWidth: 1,
   },
   separator: {
     height: 15,
