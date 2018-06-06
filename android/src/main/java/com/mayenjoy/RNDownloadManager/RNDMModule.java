@@ -1,8 +1,8 @@
-package com.wjianzhong.RNDownloadManager;
+package com.mayenjoy.RNDownloadManager;
 
 import android.os.Environment;
 import android.database.Cursor;
-import android.widget.Toast;
+// import android.widget.Toast;
 import android.webkit.MimeTypeMap;
 import android.content.IntentFilter;
 import android.os.Build;
@@ -22,31 +22,33 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.Promise;
 
 public class RNDMModule extends ReactContextBaseJavaModule {
 
   private long taskId = 0;
   private DownloadManager downloadManager;
-  private ReactApplicationContext reactContext;
-  private Promise dmPromise;
+  private ReactApplicationContext rContext;
   private Boolean isAutoInstall = false;
-  BroadcastReceiver dmReceiver;
+  // 支持多任务同时进行
+  private Map<Long, Promise> taskPromises = new HashMap<>();
+  private Map<Long, Boolean> taskAutoInstalls = new HashMap<>();
 
   public RNDMModule(ReactApplicationContext reactContext) {
     super(reactContext);
-    reactContext = reactContext;
+    rContext = reactContext;
   }
 
   @Override
   public String getName() {
-    return "MyDownload";
+    return "RNDownloadManager";
   }
 
   @Override
   public Map<String, Object> getConstants() {
     final Map<String, Object> constants = new HashMap<>();
-    constants.put("DirDownload", Environment.DIRECTORY_DOWNLOADS);
+    constants.put("DirDownload", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath());
     constants.put("DirExternalStorage", Environment.getExternalStorageDirectory().getPath());
     return constants;
   }
@@ -60,19 +62,14 @@ public class RNDMModule extends ReactContextBaseJavaModule {
       promise.reject("Error", "Missing the download url");
       return;
     }
-    String title = options.hasKey("title") ? options.getString("title") : "正在下载";
-    String description = options.hasKey("description") ? options.getString("description") : "";
+    String title = options.hasKey("title") ? options.getString("title") : null;
+    String description = options.hasKey("description") ? options.getString("description") : null;
     String savePath = options.hasKey("savePath") ? options.getString("savePath") : null;
-    String saveName = options.hasKey("saveName") ? options.getString("saveName") : null;
-    isAutoInstall = options.hasKey("autoInstall") ? options.getBoolean("autoInstall") : false;
-    dmPromise = promise;
-    if(dmReceiver == null) {
-      setReceiver();
-    }
+    // isAutoInstall = options.hasKey("autoInstall") ? options.getBoolean("autoInstall") : false;
     
     // 注册广播接收器
     IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-    reactContext.registerReceiver(dmReceiver, filter);
+    rContext.registerReceiver(dmReceiver, filter);
       
     DownloadManager.Request request;
     try {
@@ -82,16 +79,20 @@ public class RNDMModule extends ReactContextBaseJavaModule {
       promise.reject("Error", e.getMessage());
       return;
     }
-    request.setTitle(title);
-    request.setDescription(description);
+    if(title != null) {
+      request.setTitle(title);
+    }
+    if(description != null) {
+      request.setDescription(description);
+    }
     // 在通知栏显示下载进度
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
       request.allowScanningByMediaScanner();
       request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
     }
     // 设置保存下载apk保存路径
-    if (savePath != null && folderExists(savePath)) {
-      request.setDestinationInExternalPublicDir(savePath, saveName);
+    if (savePath != null) {
+      request.setDestinationUri(Uri.fromFile(new File(savePath)));
     }
     // 设置可以被系统的Downloads应用扫描到并管理
     request.setVisibleInDownloadsUi(true);
@@ -99,62 +100,54 @@ public class RNDMModule extends ReactContextBaseJavaModule {
     MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
     request.setMimeType(mimeTypeMap.getMimeTypeFromExtension(url));
     // 开始下载
-    downloadManager = (DownloadManager) reactContext.getSystemService(Context.DOWNLOAD_SERVICE);
+    downloadManager = (DownloadManager) rContext.getSystemService(Context.DOWNLOAD_SERVICE);
     taskId = downloadManager.enqueue(request);
+    taskPromises.put(taskId, promise);
+    if(options.hasKey("autoInstall")) {
+      taskAutoInstalls.put(taskId, options.getBoolean("autoInstall"));
+    }
   }
 
   /**
    * 广播接受器, 下载完成监听器
    */
-  private void setReceiver() {
-    if(dmReceiver != null) {
-      return;
-    }
-    dmReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        if (action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
-          // 下载完成了
-          // 获取当前完成任务的ID
-          long doneDownloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-          if (doneDownloadId != taskId) {
-            dmPromise.reject("Error", "Download-id does not match");
-            return;
-          }
-          // 自动安装应用
-          DownloadManager.Query query = new DownloadManager.Query();
-          query.setFilterById(doneDownloadId);
-          Cursor cursor = downloadManager.query(query);
-          if (cursor.moveToFirst()) {
-            try {
-              int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
-              // 下载失败也会返回这个广播，所以要判断下是否真的下载成功
-              if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(columnIndex)) {
-                // 获取下载好的 apk 路径
-                String uriString = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
-                
-                // 提示用户安装
-                if(isAutoInstall) {
-                  installApk(uriString, dmPromise);
-                }else {
-                  dmPromise.resolve(uriString);
-                }
-              }
-            } catch (Exception e) {
-              e.printStackTrace();
-              dmPromise.reject("Error", e.getMessage());
-              return;
+  BroadcastReceiver dmReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      String action = intent.getAction();
+      if (action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
+        // 下载完成了
+        // 获取当前完成任务的ID
+        long doneDownloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+        Promise thisPromise = taskPromises.get(doneDownloadId);
+        if(thisPromise == null) {
+          thisPromise.reject("Error", "Download-id does not match");
+          return;
+        }
+        // 自动安装应用
+        DownloadManager.Query query = new DownloadManager.Query();
+        query.setFilterById(doneDownloadId);
+        Cursor cursor = downloadManager.query(query);
+        if (cursor.moveToFirst()) {
+          int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+          // 下载失败也会返回这个广播，所以要判断下是否真的下载成功
+          if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(columnIndex)) {
+            // 获取下载好的 apk 路径
+            String uriString = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
+            
+            // 是否安装
+            if(taskAutoInstalls.get(doneDownloadId) != null) {
+              installApk(uriString, thisPromise);
+            }else {
+              thisPromise.resolve(uriString);
             }
-          }else {
-            dmPromise.reject("Error", "Something wrong when getting the file downloaded");
           }
         }else {
-          dmPromise.reject("dmReceiver", "Something wrong when download completed: not ACTION_DOWNLOAD_COMPLETE");
+          thisPromise.reject("Error", "Something wrong when getting the file downloaded");
         }
       }
-    };
-  }
+    }
+  };
 
   @ReactMethod
   public void installApk(final String url, final Promise promise) {
@@ -174,19 +167,8 @@ public class RNDMModule extends ReactContextBaseJavaModule {
     Intent intent = new Intent(Intent.ACTION_VIEW);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     intent.setDataAndType(apkuri, "application/vnd.android.package-archive");
-    reactContext.startActivity(intent);
     promise.resolve("success");
+    rContext.startActivity(intent);
   }
 
-  boolean folderExists(String strFolder) {
-    File file = new File(strFolder);
-    if (!file.exists()) {
-      if (file.mkdirs()) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-    return true;
-  }
 }

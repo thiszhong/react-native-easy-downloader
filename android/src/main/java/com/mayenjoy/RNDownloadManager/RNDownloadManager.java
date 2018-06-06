@@ -1,4 +1,4 @@
-package com.wjianzhong.RNDownloadManager;
+package com.mayenjoy.RNDownloadManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;

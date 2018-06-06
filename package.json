@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wJianZhong/RN-downloadManager.git"
+    "url": "git+https://github.com/wJianZhong/React-native-easy-download-manager.git"
   },
   "author": {
     "name": "Wang Jianzhong",
@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wJianZhong/RN-downloadManager/issues"
+    "url": "https://github.com/wJianZhong/React-native-easy-download-manager/issues"
   },
-  "homepage": "https://github.com/wJianZhong/RN-downloadManager#readme"
+  "homepage": "https://github.com/wJianZhong/React-native-easy-download-manager#readme"
 }

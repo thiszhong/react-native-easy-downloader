@@ -13,25 +13,24 @@ import {
   Button,
   Alert
 } from 'react-native';
-import RNDownloadManager from 'react-native-easy-download-manager';
+import RNDM from 'react-native-easy-download-manager';
 
-// const DM = NativeModules.MyDownload;
+const testUrl = 'http://img.rulili.com/xuanpin/software/1806/qhz_v2.0.5_20180606_update.apk';
 
 type Props = {};
 export default class App extends Component<Props> {
   render() {
-    alert(RNDownloadManager);
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Download and install apk for android
+          Download files and install apk for android
         </Text>
         <Button
           onPress={() => {
-            DM.download({
-              url: 'http://imtt.dd.qq.com/16891/786C74AFC59C29458CD2F3D6922F49DC.apk?fsname=cn.mamaguai.cms.xiangli_2.0.4_204.apk&csr=1bbd',
+            RNDM.download({
+              url: testUrl,
             }).then(
-              ret => Alert.alert('The file path is', ret)
+              ret => Alert.alert('Download success ', ret)
             ).catch (
               err => Alert.alert('Something wrong', err.message)
             )
@@ -42,7 +41,7 @@ export default class App extends Component<Props> {
         <View style={styles.separator}></View>
         <Button
           onPress={() => {
-            DM.installApk('test').then(
+            RNDM.installApk('test').then(
               // success
             ).catch (
               err => Alert.alert('Something wrong', err.message)
@@ -54,11 +53,14 @@ export default class App extends Component<Props> {
         <View style={styles.separator}></View>
         <Button
           onPress={() => {
-            DM.download({
-              url: 'http://imtt.dd.qq.com/16891/786C74AFC59C29458CD2F3D6922F49DC.apk?fsname=cn.mamaguai.cms.xiangli_2.0.4_204.apk&csr=1bbd',
-              autoInstall: true
+            RNDM.download({
+              url: testUrl,
+              autoInstall: true,
+              savePath: RNDM.DirDownload + '/test.apk',
+              title: 'test',
+              description: 'v2.0.5',
             }).then(
-              ret => Alert.alert('The file path is', ret)
+              ret => console.log('Success ', ret)
             ).catch (
               err => Alert.alert('Something wrong', err.message)
             )
@@ -68,8 +70,9 @@ export default class App extends Component<Props> {
         />
         <View style={styles.separator}></View>
         <Text style={styles.instructions}>Static props:</Text>
-        {/* <Text>DM.DirDownload: {DM.DirDownload}</Text> */}
-        {/* <Text>DM.DirExternalStorage: {DM.DirExternalStorage}</Text> */}
+        <Text>DirDownload: {RNDM.DirDownload}</Text>
+        <View style={styles.separator}></View>
+        <Text>DirExternalStorage: {RNDM.DirExternalStorage}</Text>
       </View>
     );
   }
