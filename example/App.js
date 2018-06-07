@@ -13,7 +13,7 @@ import {
   Button,
   Alert
 } from 'react-native';
-import RNDM from 'react-native-easy-download-manager';
+import RNDM from 'react-native-downloader';
 
 const testUrl = 'http://img.rulili.com/xuanpin/software/1806/qhz_v2.0.5_20180606_update.apk';
 

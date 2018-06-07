@@ -1,4 +1,4 @@
-# React-native-easy-download-manager
+# react-native-downloader
 
 A downloadManager for react-native to use system downloadManager(Show download progress in notifications) and install apk files on android.
 
@@ -6,11 +6,11 @@ Support multitasking and each task will have its own promise(callback).
 
 ## Add it to your project
 
-`$ npm install  react-native-easy-download-manager --save `
+`$ npm install  react-native-downloader --save `
 
 Then you can try linking the project automatically:
 
-`$ react-native link react-native-easy-download-manager `
+`$ react-native link react-native-downloader `
 
 or do it manually as described below:
 
@@ -19,15 +19,15 @@ or do it manually as described below:
 1. in `android/settings.gradle`
 ```
 ...
-include ':react-native-easy-download-manager'
-project(':react-native-easy-download-manager').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-easy-download-manager/android')
+include ':react-native-downloader'
+project(':react-native-downloader').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-downloader/android')
 ```
 
 2. in `android/app/build.gradle` add:
 ```
 dependencies {
     ...
-    compile project(':react-native-easy-download-manager')
+    compile project(':react-native-downloader')
 }
 ```
 
@@ -90,7 +90,7 @@ The following code will produce something like this:
 ![Example code result](./example/src/images/example2.png)
 
 ```javascript
-import RNDM from 'react-native-easy-download-manager';
+import RNDM from 'react-native-downloader';
 
 const testUrl = 'http://img.rulili.com/xuanpin/software/1806/qhz_v2.0.5_20180606_update.apk';
 

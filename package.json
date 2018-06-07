@@ -1,22 +1,32 @@
 {
-  "name": "react-native-easy-download-manager",
+  "name": "react-native-downloader",
   "version": "0.0.1",
-  "description": "Download files by system download-manager and install apk",
+  "description": "Download files using system download manager and install apk files",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wJianZhong/React-native-easy-download-manager.git"
+    "url": "git+https://github.com/wJianZhong/react-native-downloader.git"
   },
+  "keywords": [
+    "react-native",
+    "react-native-component",
+    "react-native-download-manager",
+    "react-native-downloader",
+    "download-manager",
+    "android",
+    "install",
+    "apk"
+  ],
   "author": {
     "name": "Wang Jianzhong",
     "email": "384232149@qq.com"
   },
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wJianZhong/React-native-easy-download-manager/issues"
+    "url": "https://github.com/wJianZhong/react-native-downloader/issues"
   },
-  "homepage": "https://github.com/wJianZhong/React-native-easy-download-manager#readme"
+  "homepage": "https://github.com/wJianZhong/react-native-downloader#readme"
 }
