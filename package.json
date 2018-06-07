@@ -13,12 +13,16 @@
   "keywords": [
     "react-native",
     "react-native-component",
+    "react-native-download",
+    "react-native-downloader",
     "react-native-download-manager",
     "react-native-easy-downloader",
     "download-manager",
+    "download",
     "android",
     "install",
-    "apk"
+    "apk",
+    "react-native-easy"
   ],
   "author": {
     "name": "Wang Jianzhong",
