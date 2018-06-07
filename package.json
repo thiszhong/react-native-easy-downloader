@@ -1,5 +1,5 @@
 {
-  "name": "react-native-downloader",
+  "name": "react-native-easy-downloader",
   "version": "0.0.1",
   "description": "Download files using system download manager and install apk files",
   "main": "index.js",
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wJianZhong/react-native-downloader.git"
+    "url": "git+https://github.com/wJianZhong/react-native-easy-downloader.git"
   },
   "keywords": [
     "react-native",
     "react-native-component",
     "react-native-download-manager",
-    "react-native-downloader",
+    "react-native-easy-downloader",
     "download-manager",
     "android",
     "install",
@@ -26,7 +26,7 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wJianZhong/react-native-downloader/issues"
+    "url": "https://github.com/wJianZhong/react-native-easy-downloader/issues"
   },
-  "homepage": "https://github.com/wJianZhong/react-native-downloader#readme"
+  "homepage": "https://github.com/wJianZhong/react-native-easy-downloader#readme"
 }
