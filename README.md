@@ -4,6 +4,10 @@ A downloadManager for react-native to use system downloadManager(Show download p
 
 Support multitasking and each task will have its own promise(callback).
 
+![Example code result](./example/src/images/example1.png)
+
+![Example code result](./example/src/images/example2.png)
+
 ## Add it to your project
 
 `$ npm install  react-native-easy-downloader --save `
@@ -82,12 +86,6 @@ path: The path of apk file
 ## Examples
 
 ### Simple
-
-The following code will produce something like this:
-
-![Example code result](./example/src/images/example1.png)
-
-![Example code result](./example/src/images/example2.png)
 
 ```javascript
 import RNDM from 'react-native-easy-downloader';
