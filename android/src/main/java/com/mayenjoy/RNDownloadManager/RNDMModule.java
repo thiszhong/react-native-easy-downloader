@@ -121,7 +121,7 @@ public class RNDMModule extends ReactContextBaseJavaModule {
         long doneDownloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
         Promise thisPromise = taskPromises.get(doneDownloadId);
         if(thisPromise == null) {
-          thisPromise.reject("Error", "Download-id does not match");
+          // thisPromise.reject("Error", "Download-id does not match"); // silly
           return;
         }
         // 自动安装应用
