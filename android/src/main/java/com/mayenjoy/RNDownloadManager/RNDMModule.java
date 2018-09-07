@@ -132,11 +132,10 @@ public class RNDMModule extends ReactContextBaseJavaModule {
           // 下载失败也会返回这个广播，所以要判断下是否真的下载成功
           if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(columnIndex)) {
             int fileNameId;
-            int fileUriId = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
-            String fileUri = cursor.getString(fileUriId);
             String filePath;
 
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+              String fileUri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
               filePath = Uri.parse(fileUri).getPath();
             } else {
               /**Android 7.0的方式：请求获取写入权限，这一步报错**/
