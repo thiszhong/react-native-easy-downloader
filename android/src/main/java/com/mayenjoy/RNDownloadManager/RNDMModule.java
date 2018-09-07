@@ -121,7 +121,6 @@ public class RNDMModule extends ReactContextBaseJavaModule {
         long doneDownloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
         Promise thisPromise = taskPromises.get(doneDownloadId);
         if(thisPromise == null) {
-          // thisPromise.reject("Error", "Download-id does not match"); // silly
           return;
         }
         // 自动安装应用
@@ -132,14 +131,24 @@ public class RNDMModule extends ReactContextBaseJavaModule {
           int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
           // 下载失败也会返回这个广播，所以要判断下是否真的下载成功
           if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(columnIndex)) {
-            // 获取下载好的 apk 路径
-            String uriString = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
+            int fileNameId;
+            int fileUriId = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+            String fileUri = cursor.getString(fileUriId);
+            String filePath;
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+              filePath = Uri.parse(fileUri).getPath();
+            } else {
+              /**Android 7.0的方式：请求获取写入权限，这一步报错**/
+              fileNameId = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME);
+              filePath = cursor.getString(fileNameId);
+            }
             
             // 是否安装
             if(taskAutoInstalls.get(doneDownloadId) != null) {
-              installApk(uriString, thisPromise);
+              installApk(filePath, thisPromise);
             }else {
-              thisPromise.resolve(uriString);
+              thisPromise.resolve(filePath);
             }
           }
         }else {
