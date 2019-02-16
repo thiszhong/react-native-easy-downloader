@@ -4921,8 +4921,10 @@ react-is@^16.3.1:
   resolved "http://registry.npm.taobao.org/react-is/download/react-is-16.4.0.tgz#cc9fdc855ac34d2e7d9d2eb7059bbc240d35ffcf"
   integrity sha512-8ADZg/mBw+t2Fbr5Hm1K64v8q8Q6E+DprV5wQ5A8PSLW6XP0XJFMdUskVEW8efQ5oUgWHn8EYdHEPAMF0Co6hA==
 
-react-native-easy-downloader@../:
+react-native-easy-downloader@0.0.3:
   version "0.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-easy-downloader/-/react-native-easy-downloader-0.0.3.tgz#d4eb4a6c7b3bdc515d65c11b7ce48e86f0e0ad7e"
+  integrity sha512-WbNl9kkMOFOYjEAFkj+WXnkXlVHt741/uBXobFxcy3BHR7v+X1ca9Y5i1DrH3DpVHkxAnoHAkyVlN5h9nTauMg==
 
 react-native@0.57.7:
   version "0.57.7"
