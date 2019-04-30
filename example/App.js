@@ -9,17 +9,51 @@ import {
   StyleSheet,
   Text,
   View,
-  NativeModules,
   Button,
-  Alert
+  Alert,
+  PermissionsAndroid,
+  Platform
 } from 'react-native';
 import RNDM from 'react-native-easy-downloader';
 
-const testUrl = 'http://img.rulili.com/xuanpin/software/1806/qhz_v2.0.5_20180606_update.apk';
+const testUrl = 'http://app.mi.com/download/548359?id=cn.mamaguai.cms.xiangli';
 
 type Props = {};
 export default class App extends Component<Props> {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasPermission: Platform.OS === 'android' && Platform.Version < 23
+    }
+    this._requestStoragePermission();
+  }
+
+  // Android 6.0 获取用于下载文件的存储权限（权限清单AndroidManifest.xml和这里动态获取都需要）
+  _requestStoragePermission = async () => {
+    if (Platform.OS !== 'android') return;
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: '申请存储权限',
+          message: '我要给你下载一个好东西',
+          buttonNeutral: 'Next times',
+          buttonNegative: 'NO',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        this.setState({ hasPermission: true })
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
   render() {
+    const { hasPermission } = this.state;
+
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
@@ -53,12 +87,16 @@ export default class App extends Component<Props> {
         <View style={styles.separator}></View>
         <Button
           onPress={() => {
+            if (!hasPermission) {
+              this._requestStoragePermission();
+              return
+            }
             RNDM.download({
               url: testUrl,
               autoInstall: true,
               savePath: RNDM.DirDownload + '/test.apk',
               title: 'test',
-              description: 'v2.0.5',
+              description: 'v2.1.4',
             }).then(
               ret => console.log('Success ', ret)
             ).catch (

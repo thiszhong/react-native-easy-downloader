@@ -1,6 +1,6 @@
 {
   "name": "react-native-easy-downloader",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Download files using system download manager and install apk files",
   "main": "index.js",
   "scripts": {

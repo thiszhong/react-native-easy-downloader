@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.app.DownloadManager;
+import android.support.v4.content.FileProvider;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -62,23 +63,17 @@ public class RNDMModule extends ReactContextBaseJavaModule {
       promise.reject("Error", "Missing the download url");
       return;
     }
-    String title = options.hasKey("title") ? options.getString("title") : null;
+    String title = options.hasKey("title") ? options.getString("title") : rContext.getPackageName();
     String description = options.hasKey("description") ? options.getString("description") : null;
     String savePath = options.hasKey("savePath") ? options.getString("savePath") : null;
     // isAutoInstall = options.hasKey("autoInstall") ? options.getBoolean("autoInstall") : false;
-    
+
     // 注册广播接收器
     IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
     rContext.registerReceiver(dmReceiver, filter);
       
-    DownloadManager.Request request;
-    try {
-      request = new DownloadManager.Request(Uri.parse(url));
-    } catch (Exception e) {
-      e.printStackTrace();
-      promise.reject("Error", e.getMessage());
-      return;
-    }
+    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+    
     if(title != null) {
       request.setTitle(title);
     }
@@ -93,7 +88,11 @@ public class RNDMModule extends ReactContextBaseJavaModule {
     // 设置保存下载apk保存路径
     if (savePath != null) {
       request.setDestinationUri(Uri.fromFile(new File(savePath)));
+    } else {
+      File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), title + ".apk");
+      request.setDestinationUri(Uri.fromFile(file));
     }
+    
     // 设置可以被系统的Downloads应用扫描到并管理
     request.setVisibleInDownloadsUi(true);
     // 设置请求的Mime
@@ -101,7 +100,13 @@ public class RNDMModule extends ReactContextBaseJavaModule {
     request.setMimeType(mimeTypeMap.getMimeTypeFromExtension(url));
     // 开始下载
     downloadManager = (DownloadManager) rContext.getSystemService(Context.DOWNLOAD_SERVICE);
-    taskId = downloadManager.enqueue(request);
+    try {
+      taskId = downloadManager.enqueue(request);
+    } catch (Exception e) {
+      e.printStackTrace();
+      promise.reject("Error", e.getMessage());
+      return;
+    }
     taskPromises.put(taskId, promise);
     if(options.hasKey("autoInstall")) {
       taskAutoInstalls.put(taskId, options.getBoolean("autoInstall"));
@@ -134,11 +139,10 @@ public class RNDMModule extends ReactContextBaseJavaModule {
             int fileNameId;
             String filePath;
 
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-              String fileUri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-              filePath = Uri.parse(fileUri).getPath();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+              filePath = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+              // filePath = Uri.parse(fileUri).getPath();
             } else {
-              /**Android 7.0的方式：请求获取写入权限，这一步报错**/
               fileNameId = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME);
               filePath = cursor.getString(fileNameId);
             }
@@ -159,24 +163,46 @@ public class RNDMModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void installApk(final String url, final Promise promise) {
-    Uri apkuri;
+
     try {
-      File apk = new File(url);
-      if (apk.exists()) {
-        apkuri = Uri.fromFile(apk);
-      } else {
-        promise.reject("Error", "File not exists");
-        return;
+      Intent intent = new Intent(Intent.ACTION_VIEW);
+      File file;
+      // File file = new File(url.substring(url.indexOf("/storage")));
+      // File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath(), "test.apk");
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+        file = new File(url.replace("file:///", "/"));
+        Uri apkUri= FileProvider.getUriForFile(rContext, "com.mayenjoy.RNDownloadManager.fileProvider", file);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+      }else{
+        file = new File(url);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
       }
+      promise.resolve("success");
+      rContext.startActivity(intent);
     } catch (Exception e) {
       promise.reject("Error", e.getMessage());
-      return;
     }
-    Intent intent = new Intent(Intent.ACTION_VIEW);
-    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    intent.setDataAndType(apkuri, "application/vnd.android.package-archive");
-    promise.resolve("success");
-    rContext.startActivity(intent);
+
+    // Uri apkuri;
+    // try {
+    //   File apk = new File(url);
+    //   if (apk.exists()) {
+    //     apkuri = Uri.fromFile(apk);
+    //   } else {
+    //     promise.reject("Error", "File not exists");
+    //     return;
+    //   }
+    // } catch (Exception e) {
+    //   promise.reject("Error", e.getMessage());
+    //   return;
+    // }
+    // Intent intent = new Intent(Intent.ACTION_VIEW);
+    // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    // intent.setDataAndType(apkuri, "application/vnd.android.package-archive");
+    // promise.resolve("success");
+    // rContext.startActivity(intent);
   }
 
 }
